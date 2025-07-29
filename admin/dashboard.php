@@ -1,9 +1,66 @@
-<?php 
+<?php
 $pageTitle = "Admin Dashboard";
 include '../../includes/header.php'; 
+require_once 'includes/admin-auth.php';
+require_once '../../includes/db.php'; 
 
-// Check if user is admin and logged in, if not redirect to login
-// This would be handled by PHP sessions in a real application
+echo "<h2>Adoption Requests</h2>";
+include 'admin_get_all_adoption_requests.php';
+
+echo "<h2>Donations</h2>";
+include 'admin_get_all_donations.php';
+
+echo "<h2>Volunteers</h2>";
+include 'admin_get_all_volunteers.php';
+
+// Dynamic stats
+$totalCats = $pdo->query("SELECT COUNT(*) FROM cats")->fetchColumn();
+$pendingAdoptions = $pdo->query("SELECT COUNT(*) FROM adoption_requests WHERE status = 'pending'")->fetchColumn();
+$newDonations = $pdo->query("SELECT COUNT(*) FROM donations WHERE DATE(timestamp) = CURDATE()")->fetchColumn();
+$volunteerApps = $pdo->query("SELECT COUNT(*) FROM volunteers WHERE status = 'pending'")->fetchColumn();
+
+// Adoption status counts
+$statusCounts = [];
+$statuses = ['Available', 'Pending Adoption', 'Adopted', 'Medical Hold'];
+foreach ($statuses as $status) {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM cats WHERE status = ?");
+    $stmt->execute([$status]);
+    $statusCounts[] = (int)$stmt->fetchColumn();
+}
+
+// Fetch recent activities (example: last 5 adoption requests)
+$recentAdoptions = $pdo->query("
+    SELECT ar.timestamp, 'Adoption Request' AS activity, u.username, ar.id
+    FROM adoption_requests ar
+    JOIN users u ON ar.user_id = u.id
+    ORDER BY ar.timestamp DESC
+    LIMIT 5
+")->fetchAll();
+
+// Fetch recent donations
+$recentDonations = $pdo->query("
+    SELECT d.timestamp, 'Donation' AS activity, u.username, d.id
+    FROM donations d
+    JOIN users u ON d.user_id = u.id
+    ORDER BY d.timestamp DESC
+    LIMIT 5
+")->fetchAll();
+
+// Fetch recent volunteer applications
+$recentVolunteers = $pdo->query("
+    SELECT v.timestamp, 'Volunteer Application' AS activity, u.username, v.id
+    FROM volunteers v
+    JOIN users u ON v.user_id = u.id
+    ORDER BY v.timestamp DESC
+    LIMIT 5
+")->fetchAll();
+
+// Merge and sort all activities by timestamp
+$recentActivities = array_merge($recentAdoptions, $recentDonations, $recentVolunteers);
+usort($recentActivities, function($a, $b) {
+    return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+});
+$recentActivities = array_slice($recentActivities, 0, 5);
 ?>
 
 <div class="container-fluid py-4">
@@ -64,7 +121,7 @@ include '../../includes/header.php';
                 </ul>
             </div>
         </nav>
-        
+
         <!-- Main Content -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -79,7 +136,57 @@ include '../../includes/header.php';
                     </button>
                 </div>
             </div>
-            
+          <!-- Adoption Requests Management -->
+<div class="card mb-4">
+  <div class="card-header bg-dark-blue text-white">
+    <h5 class="mb-0">Manage Adoption Requests</h5>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Full Name</th>
+            <th>Contact</th>
+            <th>Cat ID</th>
+            <th>Message</th>
+            <th>Status</th>
+            <th>Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php
+            // Fetch adoption requests from the database
+            require_once '../includes/db.php'; // adjust path based on your file structure
+          $stmt = $pdo->query("SELECT * FROM adoption_requests ORDER BY timestamp DESC");
+          while ($request = $stmt->fetch(PDO::FETCH_ASSOC)):
+          ?>
+            <tr>
+              <td><?= htmlspecialchars($request['id']) ?></td>
+              <td><?= htmlspecialchars($request['full_name']) ?></td>
+              <td><?= htmlspecialchars($request['contact']) ?></td>
+              <td><?= htmlspecialchars($request['cat_id']) ?></td>
+              <td><?= htmlspecialchars($request['message']) ?></td>
+              <td><?= htmlspecialchars($request['status']) ?></td>
+              <td>
+                <form action="../../Backend/process_adoption_request.php" method="POST" class="d-flex">
+                  <input type="hidden" name="request_id" value="<?= $request['id'] ?>">
+                  <select name="status" class="form-select form-select-sm me-2">
+                    <option value="pending" <?= $request['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
+                    <option value="approved" <?= $request['status'] == 'approved' ? 'selected' : '' ?>>Approved</option>
+                    <option value="rejected" <?= $request['status'] == 'rejected' ? 'selected' : '' ?>>Rejected</option>
+                  </select>
+                  <button type="submit" class="btn btn-sm btn-dark-brown">Update</button>
+                </form>
+              </td>
+            </tr>
+          <?php endwhile; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>   
             <!-- Stats Cards -->
             <div class="row mb-4">
                 <div class="col-md-3">
@@ -88,7 +195,7 @@ include '../../includes/header.php';
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="card-title">Total Cats</h6>
-                                    <h2 class="mb-0">42</h2>
+                                    <h2 class="mb-0"><?php echo $totalCats; ?></h2>
                                 </div>
                                 <i class="fas fa-cat fa-2x"></i>
                             </div>
@@ -102,7 +209,7 @@ include '../../includes/header.php';
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="card-title">Pending Adoptions</h6>
-                                    <h2 class="mb-0">8</h2>
+                                    <h2 class="mb-0"><?php echo $pendingAdoptions; ?></h2>
                                 </div>
                                 <i class="fas fa-paw fa-2x"></i>
                             </div>
@@ -116,7 +223,7 @@ include '../../includes/header.php';
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="card-title">New Donations</h6>
-                                    <h2 class="mb-0">12</h2>
+                                    <h2 class="mb-0"><?php echo $newDonations; ?></h2>
                                 </div>
                                 <i class="fas fa-donate fa-2x"></i>
                             </div>
@@ -130,7 +237,7 @@ include '../../includes/header.php';
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="card-title">Volunteer Apps</h6>
-                                    <h2 class="mb-0">5</h2>
+                                    <h2 class="mb-0"><?php echo $volunteerApps; ?></h2>
                                 </div>
                                 <i class="fas fa-hands-helping fa-2x"></i>
                             </div>
@@ -159,37 +266,15 @@ include '../../includes/header.php';
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>June 20, 2023</td>
-                                            <td>New adoption request</td>
-                                            <td>Juan Dela Cruz</td>
-                                            <td><a href="#" class="btn btn-sm btn-outline-dark-brown">View</a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>June 19, 2023</td>
-                                            <td>Donation received</td>
-                                            <td>Maria Santos</td>
-                                            <td><a href="#" class="btn btn-sm btn-outline-dark-brown">View</a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>June 18, 2023</td>
-                                            <td>New volunteer application</td>
-                                            <td>Robert Lim</td>
-                                            <td><a href="#" class="btn btn-sm btn-outline-dark-brown">View</a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>June 17, 2023</td>
-                                            <td>Cat profile updated</td>
-                                            <td>Admin</td>
-                                            <td><a href="#" class="btn btn-sm btn-outline-dark-brown">View</a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>June 16, 2023</td>
-                                            <td>Adoption approved</td>
-                                            <td>Admin</td>
-                                            <td><a href="#" class="btn btn-sm btn-outline-dark-brown">View</a></td>
-                                        </tr>
-                                    </tbody>
+<?php foreach ($recentActivities as $activity): ?>
+    <tr>
+        <td><?php echo date('F j, Y', strtotime($activity['timestamp'])); ?></td>
+        <td><?php echo htmlspecialchars($activity['activity']); ?></td>
+        <td><?php echo htmlspecialchars($activity['username']); ?></td>
+        <td><a href="#" class="btn btn-sm btn-outline-dark-brown">View</a></td>
+    </tr>
+<?php endforeach; ?>
+</tbody>
                                 </table>
                             </div>
                         </div>
@@ -237,9 +322,9 @@ include '../../includes/header.php';
     const adoptionChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Available', 'Pending', 'Adopted', 'Medical Hold'],
+            labels: ['Available', 'Pending Adoption', 'Adopted', 'Medical Hold'],
             datasets: [{
-                data: [18, 8, 24, 5],
+                data: <?php echo json_encode($statusCounts); ?>,
                 backgroundColor: [
                     '#FFD166',
                     '#3A506B',

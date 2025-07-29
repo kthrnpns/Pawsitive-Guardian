@@ -1,0 +1,112 @@
+
+
+ito yung dashboard kapag hindi na hard coaded
+
+
+
+<?php
+session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'user') {
+    header("Location: login.php");
+    exit();
+}
+require_once 'db.php';
+
+$user_id = $_SESSION['user_id'];
+
+// Get user info
+$userQuery = $conn->prepare("SELECT first_name, last_name, created_at FROM users WHERE id = ?");
+$userQuery->bind_param("i", $user_id);
+$userQuery->execute();
+$userResult = $userQuery->get_result();
+$user = $userResult->fetch_assoc();
+
+// Get adoption count
+$adoptionQuery = $conn->prepare("SELECT COUNT(*) as total FROM adoption_requests WHERE user_id = ?");
+$adoptionQuery->bind_param("i", $user_id);
+$adoptionQuery->execute();
+$adoptionResult = $adoptionQuery->get_result();
+$adoptionCount = $adoptionResult->fetch_assoc()['total'];
+
+// Get donation total
+$donationQuery = $conn->prepare("SELECT SUM(amount) as total FROM donations WHERE user_id = ?");
+$donationQuery->bind_param("i", $user_id);
+$donationQuery->execute();
+$donationResult = $donationQuery->get_result();
+$donationTotal = $donationResult->fetch_assoc()['total'] ?? 0;
+
+// Get volunteer hours
+$volunteerQuery = $conn->prepare("SELECT SUM(hours) as total FROM volunteers WHERE user_id = ?");
+$volunteerQuery->bind_param("i", $user_id);
+$volunteerQuery->execute();
+$volunteerResult = $volunteerQuery->get_result();
+$volunteerHours = $volunteerResult->fetch_assoc()['total'] ?? 0;
+
+// Progress bar
+$goal = 50;
+$percentage = min(100, ($volunteerHours / $goal) * 100);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex flex-column align-items-center text-center">
+                        <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="User" class="rounded-circle" width="150">
+                        <div class="mt-3">
+                            <h5 class="mb-1"><?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?></h5>
+                            <p class="text-muted small">Member since <?= date("F Y", strtotime($user['created_at'])) ?></p>
+                        </div>
+                    </div>
+                    <hr class="my-4" />
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-3">
+                            <h6>Adoption Status</h6>
+                            <h3 class="mb-0"><?= $adoptionCount ?></h3>
+                            <span class="text-muted">Request(s) made</span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h6>Donations</h6>
+                            <h3 class="mb-0">₱<?= number_format($donationTotal) ?></h3>
+                            <span class="text-muted">Total</span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h6>Volunteer Hours</h6>
+                            <h3 class="mb-0"><?= $volunteerHours ?></h3>
+                            <span class="text-muted">Contributed</span>
+                            <div class="progress mt-2" style="height: 8px;">
+                                <div class="progress-bar bg-warning" role="progressbar"
+                                     style="width: <?= $percentage ?>%;"
+                                     aria-valuenow="<?= $percentage ?>" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                            <small class="text-muted"><?= $volunteerHours ?>/<?= $goal ?> hours</small>
+                        </div>
+                    </div>
+                    <hr class="my-4" />
+                    <div class="d-flex justify-content-center">
+                        <a href="logout.php" class="btn btn-outline-danger">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+</html>

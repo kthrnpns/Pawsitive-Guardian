@@ -1,7 +1,28 @@
 <?php 
 $pageTitle = "My Adoption Requests";
 include 'includes/header.php';
+require_once 'db.php';
+
+require_once 'db.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $full_name = $_POST["full_name"];
+    $email = $_POST["email"];
+    $address = $_POST["address"];
+    $phone = $_POST["phone"];
+    $cat_name = $_POST["cat_name"];
+    $reason = $_POST["reason"];
+
+    $stmt = $pdo->prepare("INSERT INTO adoptions (full_name, email, address, phone, cat_name, reason) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$full_name, $email, $address, $phone, $cat_name, $reason]);
+
+    echo "<h2>Thank you for your adoption request!</h2>";
+} else {
+    echo "Invalid request.";
+}
 ?>
+?>
+<?php require_once 'includes/user-auth.php'; // Ensure user is authenticated ?>
 
 <div class="container py-5">
     <div class="row">

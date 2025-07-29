@@ -73,7 +73,7 @@ include 'includes/header.php';
 </section>
 
 <!-- Volunteer Form -->
-<section class="py-5" style="background-color: #f7e8b7ff;>
+<section class="py-5" style="background-color: #f7e8b7ff;">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8">

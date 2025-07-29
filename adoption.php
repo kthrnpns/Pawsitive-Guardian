@@ -12,7 +12,7 @@ include 'includes/header.php';
 </section>
 
 <!-- Adoption Process -->
-<section class="py-5" style=" background: #f7e8b7ff;>
+<section class="py-5" style="background: #f7e8b7ff;">
     <div class="container">
         <div class="text-center mb-5">
             <h2>Our Adoption Process</h2>

@@ -1,6 +1,49 @@
 <?php 
+require_once 'includes/admin-auth.php';
+require_once '../../includes/db.php';
 $pageTitle = "Cat Management";
 include '../../includes/admin-header.php';
+
+// Handle delete action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
+    $stmt = $pdo->prepare("DELETE FROM cats WHERE id = ?");
+    $stmt->execute([$_POST['delete_id']]);
+    header("Location: cats.php?deleted=1");
+    exit();
+}
+
+// Filters
+$where = [];
+$params = [];
+
+if (!empty($_GET['status']) && $_GET['status'] !== 'All') {
+    $where[] = 'status = ?';
+    $params[] = $_GET['status'];
+}
+if (!empty($_GET['gender']) && $_GET['gender'] !== 'All') {
+    $where[] = 'gender = ?';
+    $params[] = $_GET['gender'];
+}
+if (!empty($_GET['age']) && $_GET['age'] !== 'All Ages') {
+    if ($_GET['age'] === 'Kitten (0-1 year)') {
+        $where[] = 'age <= 1';
+    } elseif ($_GET['age'] === 'Young (1-3 years)') {
+        $where[] = 'age > 1 AND age <= 3';
+    } elseif ($_GET['age'] === 'Adult (3-7 years)') {
+        $where[] = 'age > 3 AND age <= 7';
+    } elseif ($_GET['age'] === 'Senior (7+ years)') {
+        $where[] = 'age > 7';
+    }
+}
+
+$sql = "SELECT * FROM cats";
+if ($where) {
+    $sql .= " WHERE " . implode(' AND ', $where);
+}
+$sql .= " ORDER BY date_added DESC";
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$cats = $stmt->fetchAll();
 ?>
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
@@ -16,33 +59,41 @@ include '../../includes/admin-header.php';
     <!-- Filters -->
     <div class="card mb-4">
         <div class="card-body">
-            <form class="row g-3">
+            <form class="row g-3" method="get" action="">
                 <div class="col-md-3">
                     <label class="form-label">Status</label>
-                    <select class="form-select">
-                        <option>All</option>
-                        <option>Available</option>
-                        <option>Pending Adoption</option>
-                        <option>Adopted</option>
-                        <option>Medical Hold</option>
+                    <select class="form-select" name="status">
+                        <?php
+                        $statuses = ['All', 'Available', 'Pending Adoption', 'Adopted', 'Medical Hold'];
+                        foreach ($statuses as $status) {
+                            $selected = (isset($_GET['status']) && $_GET['status'] === $status) ? 'selected' : '';
+                            echo "<option $selected>$status</option>";
+                        }
+                        ?>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Age</label>
-                    <select class="form-select">
-                        <option>All Ages</option>
-                        <option>Kitten (0-1 year)</option>
-                        <option>Young (1-3 years)</option>
-                        <option>Adult (3-7 years)</option>
-                        <option>Senior (7+ years)</option>
+                    <select class="form-select" name="age">
+                        <?php
+                        $ages = ['All Ages', 'Kitten (0-1 year)', 'Young (1-3 years)', 'Adult (3-7 years)', 'Senior (7+ years)'];
+                        foreach ($ages as $age) {
+                            $selected = (isset($_GET['age']) && $_GET['age'] === $age) ? 'selected' : '';
+                            echo "<option $selected>$age</option>";
+                        }
+                        ?>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Gender</label>
-                    <select class="form-select">
-                        <option>All</option>
-                        <option>Male</option>
-                        <option>Female</option>
+                    <select class="form-select" name="gender">
+                        <?php
+                        $genders = ['All', 'Male', 'Female'];
+                        foreach ($genders as $gender) {
+                            $selected = (isset($_GET['gender']) && $_GET['gender'] === $gender) ? 'selected' : '';
+                            echo "<option $selected>$gender</option>";
+                        }
+                        ?>
                     </select>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
@@ -55,6 +106,9 @@ include '../../includes/admin-header.php';
     <!-- Cats Table -->
     <div class="card">
         <div class="card-body">
+            <?php if (isset($_GET['deleted'])): ?>
+                <div class="alert alert-success">Cat deleted successfully.</div>
+            <?php endif; ?>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
@@ -70,78 +124,59 @@ include '../../includes/admin-header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php for($i = 1; $i <= 5; $i++): 
-                        $status = ['Available', 'Pending Adoption', 'Adopted', 'Medical Hold'][rand(0,3)];
-                        $statusClass = [
-                            'Available' => 'success',
-                            'Pending Adoption' => 'warning',
-                            'Adopted' => 'primary',
-                            'Medical Hold' => 'danger'
-                        ][$status];
-                        ?>
+                        <?php foreach ($cats as $cat): ?>
                         <tr>
-                            <td>CAT<?php echo 1000 + $i; ?></td>
+                            <td>CAT<?php echo 1000 + $cat['id']; ?></td>
                             <td>
-                                <img src="../../assets/images/cat<?php echo $i % 3 + 1; ?>.jpg" class="rounded-circle" width="40" height="40" alt="Cat">
+                                <?php if ($cat['profile_photo']): ?>
+                                    <img src="../../assets/images/<?php echo htmlspecialchars($cat['profile_photo']); ?>" class="rounded-circle" width="40" height="40" alt="Cat">
+                                <?php else: ?>
+                                    <span class="text-muted">No Photo</span>
+                                <?php endif; ?>
                             </td>
-                            <td><?php echo ['Milo', 'Luna', 'Oliver', 'Bella', 'Leo'][$i-1]; ?></td>
-                            <td><?php echo rand(1, 10); ?> years</td>
-                            <td><?php echo $i % 2 ? 'Male' : 'Female'; ?></td>
-                            <td><span class="badge bg-<?php echo $statusClass; ?>"><?php echo $status; ?></span></td>
-                            <td><?php echo date('m/d/Y', strtotime('-'.rand(1,30).' days')); ?></td>
+                            <td><?php echo htmlspecialchars($cat['name']); ?></td>
+                            <td><?php echo (int)$cat['age']; ?> years</td>
+                            <td><?php echo htmlspecialchars($cat['gender']); ?></td>
+                            <td>
+                                <?php
+                                $statusClass = [
+                                    'Available' => 'success',
+                                    'Pending Adoption' => 'warning',
+                                    'Adopted' => 'primary',
+                                    'Medical Hold' => 'danger'
+                                ][$cat['status']];
+                                ?>
+                                <span class="badge bg-<?php echo $statusClass; ?>"><?php echo htmlspecialchars($cat['status']); ?></span>
+                            </td>
+                            <td><?php echo date('m/d/Y', strtotime($cat['date_added'])); ?></td>
                             <td>
                                 <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-dark-brown dropdown-toggle" type="button" id="actionsDropdown<?php echo $i; ?>" data-bs-toggle="dropdown">
+                                    <button class="btn btn-sm btn-outline-dark-brown dropdown-toggle" type="button" id="actionsDropdown<?php echo $cat['id']; ?>" data-bs-toggle="dropdown">
                                         Actions
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="cat-view.php?id=<?php echo $i; ?>"><i class="fas fa-eye me-2"></i>View</a></li>
-                                        <li><a class="dropdown-item" href="cat-edit.php?id=<?php echo $i; ?>"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                        <li><a class="dropdown-item" href="cat-view.php?id=<?php echo $cat['id']; ?>"><i class="fas fa-eye me-2"></i>View</a></li>
+                                        <li><a class="dropdown-item" href="cat-edit.php?id=<?php echo $cat['id']; ?>"><i class="fas fa-edit me-2"></i>Edit</a></li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal<?php echo $i; ?>"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                                        <li>
+                                            <form method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this cat?');">
+                                                <input type="hidden" name="delete_id" value="<?php echo $cat['id']; ?>">
+                                                <button type="submit" class="dropdown-item text-danger"><i class="fas fa-trash me-2"></i>Delete</button>
+                                            </form>
+                                        </li>
                                     </ul>
-                                </div>
-                                
-                                <!-- Delete Modal -->
-                                <div class="modal fade" id="deleteModal<?php echo $i; ?>" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Confirm Delete</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Are you sure you want to delete <?php echo ['Milo', 'Luna', 'Oliver', 'Bella', 'Leo'][$i-1]; ?>'s record?</p>
-                                                <p class="text-danger">This action cannot be undone.</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                <button type="button" class="btn btn-danger">Delete</button>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </td>
                         </tr>
-                        <?php endfor; ?>
+                        <?php endforeach; ?>
+                        <?php if (empty($cats)): ?>
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">No cats found.</td>
+                        </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
-            
-            <!-- Pagination -->
-            <nav class="mt-4">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#">Previous</a>
-                    </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">Next</a>
-                    </li>
-                </ul>
-            </nav>
         </div>
     </div>
 </main>

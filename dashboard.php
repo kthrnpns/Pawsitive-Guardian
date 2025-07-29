@@ -2,8 +2,13 @@
 $pageTitle = "User Dashboard";
 include 'includes/header.php'; 
 
-// Check if user is logged in, if not redirect to login
-// This would be handled by PHP sessions in a real application
+
+session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'user') {
+    header("Location: login.php");
+    exit();
+}
+require_once 'db.php'; // if not already included
 ?>
 
 <div class="container py-5">
