@@ -171,7 +171,7 @@ include 'includes/header.php';
                             "Luna is a senior cat who needs regular vet checkups and joint supplements.",
                             "Oliver was rescued with an injured leg and needs physical therapy sessions."
                         ][$i-1]; ?></p>
-                        <p class="fw-bold text-yellow">Monthly Sponsorship: ₱<?php echo [1500, 2000, 2500][$i-1]; ?></p>
+                        <p class="fw-bold text-yellow">Monthly Sponsorship: ₱<?php echo [1000, 1000, 1000][$i-1]; ?></p>
                     </div>
                     <div class="card-footer bg-white border-0">
                         <button class="btn btn-dark-brown w-100" data-bs-toggle="modal" data-bs-target="#sponsorModal<?php echo $i; ?>">Sponsor Now</button>

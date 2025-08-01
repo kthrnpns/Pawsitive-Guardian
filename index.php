@@ -54,66 +54,31 @@ include 'includes/header.php';
             <p class="lead">These adorable cats are looking for their forever homes</p>
         </div>
         <div class="row g-4">
-            <!-- Cat 1 -->
+            <?php
+            require_once 'includes/db-connect.php';
+            
+            // Get 4 random available cats
+            $stmt = $pdo->query("SELECT * FROM cats WHERE `ADOPTION` = 'Available' ORDER BY RAND() LIMIT 4");
+            $featuredCats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            foreach ($featuredCats as $cat): 
+                $imagePath = !empty($cat['image_path']) ? $cat['image_path'] : 'assets/images/default-cat.jpg';
+            ?>
             <div class="col-md-6 col-lg-3">
                 <div class="cat-card h-100">
-                    <img src="assets/images/cat1.jpg" class="card-img-top" alt="Milo">
+                    <img src="<?= htmlspecialchars($imagePath) ?>" class="card-img-top" alt="<?= htmlspecialchars($cat['NAME']) ?>">
                     <div class="card-body">
-                        <h5 class="card-title">Tyler</h5>
-                        <p class="card-text">Male • Quite</p>
+                        <h5 class="card-title"><?= htmlspecialchars($cat['NAME']) ?></h5>
+                        <p class="card-text"><?= htmlspecialchars($cat['GENDER']) ?> • <?= htmlspecialchars($cat['AGE']) ?></p>
                     </div>
                     <div class="cat-overlay">
-                        <h5>Tyler</h5>
-                        <p>He is not just another rescue, he’s the resident boss man. He prefers quiet mornings, plush beds, and being admired from a distance (unless you’re bringing food).</p>
-                        <a href="adoption.php" class="btn btn-yellow btn-sm">Adopt Me</a>
+                        <h5><?= htmlspecialchars($cat['NAME']) ?></h5>
+                        <p><?= substr(htmlspecialchars($cat['MEDICAL_NOTES'] ?? 'No description available'), 0, 150) ?>...</p>
+                        <a href="cat-details.php?id=<?= $cat['id'] ?>" class="btn btn-yellow btn-sm">View Details</a>
                     </div>
                 </div>
             </div>
-            <!-- Cat 2 -->
-            <div class="col-md-6 col-lg-3">
-                <div class="cat-card h-100">
-                    <img src="assets/images/cat2.jpg" class="card-img-top" alt="Luna">
-                    <div class="card-body">
-                        <h5 class="card-title">Luna</h5>
-                        <p class="card-text">Female • Playful</p>
-                    </div>
-                    <div class="cat-overlay">
-                        <h5>Patchie</h5>
-                        <p>She is one of the kittens of Mama Veronica, one of the stray cats we helped through our TNVR program. She grew up in the care of the community lively, playful, and full of life.</p>
-                        <a href="adoption.php" class="btn btn-yellow btn-sm">Adopt Me</a>
-                    </div>
-                </div>
-            </div>
-            <!-- Cat 3 -->
-            <div class="col-md-6 col-lg-3">
-                <div class="cat-card h-100">
-                    <img src="assets/images/cat3.jpg" class="card-img-top" alt="Oliver">
-                    <div class="card-body">
-                        <h5 class="card-title">Sky</h5>
-                        <p class="card-text">Male • Clingy</p>
-                    </div>
-                    <div class="cat-overlay">
-                        <h5>Sky</h5>
-                        <p>He’s our certified crybaby who wants all the attention, all the time.</p>
-                        <a href="adoption.php" class="btn btn-yellow btn-sm">Adopt Me</a>
-                    </div>
-                </div>
-            </div>
-            <!-- Cat 4 -->
-            <div class="col-md-6 col-lg-3">
-                <div class="cat-card h-100">
-                    <img src="assets/images/cat4.jpg" class="card-img-top" alt="Bella">
-                    <div class="card-body">
-                        <h5 class="card-title">Forbie</h5>
-                        <p class="card-text">Female • Little Adventurer</p>
-                    </div>
-                    <div class="cat-overlay">
-                        <h5>Forbie</h5>
-                        <p>She is a brave fluffball that is now showing off her playful side and quickly warming up.</p>
-                        <a href="adoption.php" class="btn btn-yellow btn-sm">Adopt Me</a>
-                    </div>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
         <div class="text-center mt-4">
             <a href="adoption.php" class="btn btn-dark-brown">View All Cats</a>

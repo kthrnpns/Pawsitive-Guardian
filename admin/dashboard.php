@@ -1,8 +1,11 @@
 <?php
+require_once '../includes/session-manager.php';
+require_admin();
+
 $pageTitle = "Admin Dashboard";
-include '../../includes/header.php'; 
+include 'includes/admin-header.php';
 require_once 'includes/admin-auth.php';
-require_once '../../includes/db.php'; 
+require_once '../../includes/db-connect.php'; 
 
 echo "<h2>Adoption Requests</h2>";
 include 'admin_get_all_adoption_requests.php';

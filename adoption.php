@@ -64,127 +64,197 @@ include 'includes/header.php';
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-5">
             <div>
-                <h2>Available for Adoption</h2>
-                <p class="mb-0">These wonderful cats are waiting for their forever homes</p>
+                <h2>Our Cats</h2>
+                <p class="mb-0">Meet all our feline friends, including those available for adoption</p>
             </div>
             <div>
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search cats...">
-                    <button class="btn btn-dark-brown" type="button">Search</button>
+                    <input type="text" class="form-control" placeholder="Search cats..." id="catSearch">
+                    <button class="btn btn-dark-brown" type="button" onclick="searchCats()">Search</button>
                 </div>
             </div>
         </div>
         
         <div class="row g-4">
             <!-- Filter Sidebar -->
-            <div class="col-lg-3" >
+            <div class="col-lg-3">
                 <div class="card shadow-sm">
                     <div class="card-body" style="background-color: #f9f5e6ff;">
-                        <h5 class="card-title mb-4" >Filter Cats</h5>
+                        <h5 class="card-title mb-4">Filter Cats</h5>
                         
-                        <div class="mb-4">
-                            <h6 class="mb-3">Gender</h6>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="male">
-                                <label class="form-check-label" for="male">Male</label>
+                        <form id="catFilters">
+                            <!-- Adoption Status Filter -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">Adoption Status</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="adoption[]" value="Available" id="available" checked>
+                                    <label class="form-check-label" for="available">Available</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="adoption[]" value="Pending Adoption" id="pending" checked>
+                                    <label class="form-check-label" for="pending">Pending Adoption</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="adoption[]" value="Foster Care" id="foster" checked>
+                                    <label class="form-check-label" for="foster">Foster Care</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="adoption[]" value="Not Available" id="notAvailable">
+                                    <label class="form-check-label" for="notAvailable">Not Available</label>
+                                </div>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="female">
-                                <label class="form-check-label" for="female">Female</label>
+                            
+                            <!-- Gender Filter -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">Gender</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="gender" value="Male" id="male" checked>
+                                    <label class="form-check-label" for="male">Male</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="gender" value="Female" id="female" checked>
+                                    <label class="form-check-label" for="female">Female</label>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <h6 class="mb-3">Age</h6>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="kitten">
-                                <label class="form-check-label" for="kitten">Kitten (0-1 year)</label>
+                            
+                            <!-- Age Filter -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">Age</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="age" value="Kitten" id="kitten" checked>
+                                    <label class="form-check-label" for="kitten">Kitten</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="age" value="Adult" id="adult" checked>
+                                    <label class="form-check-label" for="adult">Adult</label>
+                                </div>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="young">
-                                <label class="form-check-label" for="young">Young (1-3 years)</label>
+                            
+                            <!-- Color Filter -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">Color</h6>
+                                <?php
+                                // Get unique colors from database
+                                require_once 'includes/db-connect.php';
+                                $colorQuery = "SELECT DISTINCT COLOR FROM cats WHERE COLOR IS NOT NULL AND COLOR != ''";
+                                $colorResult = $conn->query($colorQuery);
+                                
+                                if ($colorResult->num_rows > 0) {
+                                    while ($color = $colorResult->fetch_assoc()) {
+                                        echo '<div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="color" value="'.htmlspecialchars($color['COLOR']).'" id="color-'.htmlspecialchars(strtolower(str_replace(' ', '-', $color['COLOR']))).'" checked>
+                                            <label class="form-check-label" for="color-'.htmlspecialchars(strtolower(str_replace(' ', '-', $color['COLOR']))).'">'.$color['COLOR'].'</label>
+                                        </div>';
+                                    }
+                                }
+                                ?>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="adult">
-                                <label class="form-check-label" for="adult">Adult (3-7 years)</label>
+                            
+                            <!-- Neuter Status Filter -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">Neuter Status</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="neuter_status[]" value="Neuter" id="neuter" checked>
+                                    <label class="form-check-label" for="neuter">Neutered</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="neuter_status[]" value="Spayed" id="spayed" checked>
+                                    <label class="form-check-label" for="spayed">Spayed</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="neuter_status[]" value="Unneuter" id="unneuter" checked>
+                                    <label class="form-check-label" for="unneuter">Unneutered</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="neuter_status[]" value="Unspayed" id="unspay" checked>
+                                    <label class="form-check-label" for="unspay">Unspayed</label>
+                                </div>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="senior">
-                                <label class="form-check-label" for="senior">Senior (7+ years)</label>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <h6 class="mb-3">Personality</h6>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="playful">
-                                <label class="form-check-label" for="playful">Playful</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="calm">
-                                <label class="form-check-label" for="calm">Calm</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="shy">
-                                <label class="form-check-label" for="shy">Shy</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="affectionate">
-                                <label class="form-check-label" for="affectionate">Affectionate</label>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-dark-brown w-100">Apply Filters</button>
+                            
+                            <button type="button" class="btn btn-dark-brown w-100" onclick="filterCats()">Apply Filters</button>
+                        </form>
                     </div>
                 </div>
             </div>
             
             <!-- Cat Listings -->
             <div class="col-lg-9">
-                <div class="row g-4">
-                    <!-- Cat cards would be dynamically generated from database -->
-                    <?php for($i = 1; $i <= 6; $i++): ?>
+                <div class="row g-4" id="catListings">
+                    <?php
+                    require_once 'includes/db-connect.php';
+
+                    // Get all cats from database using MySQLi
+                    $sql = "SELECT * FROM cats ORDER BY 
+                            CASE 
+                                WHEN ADOPTION = 'Available' THEN 1
+                                WHEN ADOPTION = 'Pending Adoption' THEN 2
+                                WHEN ADOPTION = 'Foster Care' THEN 3
+                                ELSE 4
+                            END, NAME ASC";
+                    $result = $conn->query($sql);
+
+                    if ($result->num_rows > 0) {
+                        while ($cat = $result->fetch_assoc()): 
+                            // Set image path - check if image_path exists, otherwise use default
+                            $imagePath = (!empty($cat['image_path']) && file_exists('assets/images/uploads/' . $cat['image_path'])) 
+                                ? 'assets/images/uploads/' . $cat['image_path'] 
+                                : 'assets/images/default.jpg';
+                            
+                            $adoptionStatus = $cat['ADOPTION'];
+                            $statusBadge = '';
+                            
+                            // Set different badge colors based on adoption status
+                            switch($adoptionStatus) {
+                                case 'Available':
+                                    $statusBadge = '<span class="badge bg-success text-white">Available</span>';
+                                    break;
+                                case 'Pending Adoption':
+                                    $statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                                    break;
+                                case 'Foster Care':
+                                    $statusBadge = '<span class="badge bg-info text-white">Foster Care</span>';
+                                    break;
+                                case 'N/A':
+                                    $statusBadge = '<span class="badge bg-secondary text-white">Not Available</span>';
+                                    break;
+                                default:
+                                    $statusBadge = '<span class="badge bg-secondary text-white">Not Available</span>';
+                            }
+                    ?>
                     <div class="col-md-6 col-lg-4">
-                        <div class="cat-card h-100">
-                            <img src="assets/images/cat<?php echo $i; ?>.jpg" class="card-img-top" alt="Cat <?php echo $i; ?>">
+                        <div class="card h-100 shadow-sm">
+                            <img src="<?php echo htmlspecialchars($imagePath); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($cat['NAME']); ?>" style="height: 200px; object-fit: cover;">
                             <div class="card-body">
-                                <h5 class="card-title">Cat Name <?php echo $i; ?></h5>
+                                <h5 class="card-title"><?php echo htmlspecialchars($cat['NAME']); ?></h5>
                                 <p class="card-text">
-                                    <span class="badge bg-yellow text-dark me-2"><?php echo rand(1, 10); ?> years</span>
-                                    <span class="badge bg-light-orange text-dark"><?php echo rand(0, 1) ? 'Male' : 'Female'; ?></span>
+                                    <?php echo $statusBadge; ?>
+                                    <span class="badge bg-yellow text-dark me-2"><?php echo htmlspecialchars($cat['AGE']); ?></span>
+                                    <span class="badge bg-light-orange text-dark"><?php echo htmlspecialchars($cat['GENDER']); ?></span>
+                                    <?php if(!empty($cat['MEDICAL_NOTES'])): ?>
+                                        <span class="badge bg-danger text-white mt-1">Special Needs</span>
+                                    <?php endif; ?>
                                 </p>
-                                <p class="card-text"><?php echo substr("This is a sample description of a cat that needs a loving home. They have a wonderful personality and would make a great companion.", 0, rand(60, 120)); ?>...</p>
+                                <p class="card-text">
+                                    <strong>Color:</strong> <?php echo htmlspecialchars($cat['COLOR']); ?><br>
+                                    <strong>Neutered:</strong> <?php echo htmlspecialchars($cat['NEUTER STATUS']); ?>
+                                </p>
                             </div>
                             <div class="card-footer bg-white border-0">
-                                <a href="cat-details.php?id=<?php echo $i; ?>" class="btn btn-dark-brown btn-sm w-100">View Details</a>
-                            </div>
-                            <div class="cat-overlay">
-                                <h5>Cat Name <?php echo $i; ?></h5>
-                                <p>Full description would go here with more details about the cat's personality, health, and special needs if any.</p>
-                                <div class="d-flex gap-2">
-                                    <a href="cat-details.php?id=<?php echo $i; ?>" class="btn btn-yellow btn-sm flex-grow-1">Details</a>
-                                    <a href="adoption-form.php?cat_id=<?php echo $i; ?>" class="btn btn-dark-brown btn-sm flex-grow-1">Adopt</a>
-                                </div>
+                                <a href="cat-details.php?id=<?php echo $cat['id']; ?>" class="btn btn-dark-brown btn-sm w-100">View Details</a>
                             </div>
                         </div>
                     </div>
-                    <?php endfor; ?>
+                    <?php endwhile; 
+                    } else { ?>
+                        <div class="col-12">
+                            <div class="alert alert-info text-center">
+                                No cats found in our database.
+                            </div>
+                        </div>
+                    <?php } 
+                    $conn->close();
+                    ?>
                 </div>
-                
-                <!-- Pagination -->
-                <nav class="mt-5">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Previous</a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Next</a>
-                        </li>
-                    </ul>
-                </nav>
             </div>
         </div>
     </div>
@@ -212,19 +282,198 @@ include 'includes/header.php';
             </div>
             <div class="col-md-6">
                 <div class="p-4 bg-white rounded shadow-sm h-100">
-                    <h4 class="mb-4 text-yellow"><i class="fas fa-times-circle me-2"></i> Adoption Fees</h4>
-                    <p>Our adoption fees help cover the costs of caring for our cats:</p>
+                    <h4 class="mb-4 text-yellow"><i class="fas fa-info-circle me-2"></i> Adoption Status Explained</h4>
                     <ul class="list-unstyled">
-                        <li class="mb-3"><i class="fas fa-paw text-yellow me-2"></i> Kittens (under 1 year): ₱2,500</li>
-                        <li class="mb-3"><i class="fas fa-paw text-yellow me-2"></i> Adults (1-7 years): ₱2,000</li>
-                        <li class="mb-3"><i class="fas fa-paw text-yellow me-2"></i> Seniors (7+ years): ₱1,500</li>
-                        <li><i class="fas fa-paw text-yellow me-2"></i> Special needs cats: Fee varies</li>
+                        <li class="mb-3"><span class="badge bg-success text-white me-2">Available</span> Ready for adoption</li>
+                        <li class="mb-3"><span class="badge bg-warning text-dark me-2">Pending</span> Currently in adoption process</li>
+                        <li class="mb-3"><span class="badge bg-info text-white me-2">Foster Care</span> Temporarily in foster home</li>
+                        <li><span class="badge bg-secondary text-white me-2">Not Available</span> Not currently for adoption</li>
                     </ul>
-                    <p class="mt-3">All cats are spayed/neutered, vaccinated, and microchipped before adoption.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+function filterCats() {
+    const form = document.getElementById('catFilters');
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    
+    // Add all checked filters
+    formData.forEach((value, key) => {
+        // For checkboxes, we only want to include checked ones
+        if (form.querySelector(`input[name="${key}"]:checked`)) {
+            params.append(key, value);
+        }
+    });
+    
+    // Debug the URL being requested
+    console.log(`Fetching: api/get_cats.php?${params.toString()}`);
+    
+    fetch(`api/get_cats.php?${params.toString()}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received data:', data); // Debug received data
+            const container = document.getElementById('catListings');
+            container.innerHTML = '';
+            
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            No cats match your filters. Please try different criteria.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            data.forEach(cat => {
+                // Set image path - check if image_path exists, otherwise use default
+                const imagePath = (cat.image_path && cat.image_path !== 'NULL') 
+                    ? 'assets/images/uploads/' + cat.image_path 
+                    : 'assets/images/default-cat.jpg';
+                
+                const hasMedicalNotes = cat.MEDICAL_NOTES && cat.MEDICAL_NOTES.trim() !== '';
+                
+                // Determine status badge
+                let statusBadge = '';
+                switch(cat.ADOPTION) {
+                    case 'Available':
+                        statusBadge = '<span class="badge bg-success text-white">Available</span>';
+                        break;
+                    case 'Pending Adoption':
+                        statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                        break;
+                    case 'Foster Care':
+                        statusBadge = '<span class="badge bg-info text-white">Foster Care</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-secondary text-white">Not Available</span>';
+                }
+                
+                container.innerHTML += `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="${imagePath}" class="card-img-top" alt="${cat.NAME}" style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title">${cat.NAME}</h5>
+                                <p class="card-text">
+                                    ${statusBadge}
+                                    <span class="badge bg-yellow text-dark me-2">${cat.AGE}</span>
+                                    <span class="badge bg-light-orange text-dark">${cat.GENDER}</span>
+                                    ${hasMedicalNotes ? '<span class="badge bg-danger text-white mt-1">Special Needs</span>' : ''}
+                                </p>
+                                <p class="card-text">
+                                    <strong>Color:</strong> ${cat.COLOR}<br>
+                                    <strong>Neutered:</strong> ${cat['NEUTER STATUS']}
+                                </p>
+                            </div>
+                            <div class="card-footer bg-white border-0">
+                                <a href="cat-details.php?id=${cat.id}" class="btn btn-dark-brown btn-sm w-100">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const container = document.getElementById('catListings');
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger text-center">
+                        Error loading cats. Please try again.
+                    </div>
+                </div>
+            `;
+        });
+}
+
+function searchCats() {
+    const searchTerm = document.getElementById('catSearch').value;
+    if (searchTerm.trim() === '') {
+        filterCats();
+        return;
+    }
+    
+    fetch(`api/search_cats.php?q=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('catListings');
+            container.innerHTML = '';
+            
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            No cats found matching "${searchTerm}". Please try a different search term.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            data.forEach(cat => {
+                // Set image path - check if image_path exists, otherwise use default
+                const imagePath = (cat.image_path && cat.image_path !== 'NULL') 
+                    ? 'assets/images/uploads/' + cat.image_path 
+                    : 'assets/images/default-cat.jpg';
+                
+                const hasMedicalNotes = cat.MEDICAL_NOTES && cat.MEDICAL_NOTES.trim() !== '';
+                
+                // Determine status badge
+                let statusBadge = '';
+                switch(cat.ADOPTION) {
+                    case 'Available':
+                        statusBadge = '<span class="badge bg-success text-white">Available</span>';
+                        break;
+                    case 'Pending Adoption':
+                        statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                        break;
+                    case 'Foster Care':
+                        statusBadge = '<span class="badge bg-info text-white">Foster Care</span>';
+                        break;
+                    default:
+                        statusBadge = '<span class="badge bg-secondary text-white">Not Available</span>';
+                }
+                
+                container.innerHTML += `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="${imagePath}" class="card-img-top" alt="${cat.NAME}" style="height: 200px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title">${cat.NAME}</h5>
+                                <p class="card-text">
+                                    ${statusBadge}
+                                    <span class="badge bg-yellow text-dark me-2">${cat.AGE}</span>
+                                    <span class="badge bg-light-orange text-dark">${cat.GENDER}</span>
+                                    ${hasMedicalNotes ? '<span class="badge bg-danger text-white mt-1">Special Needs</span>' : ''}
+                                </p>
+                                <p class="card-text">
+                                    <strong>Color:</strong> ${cat.COLOR}<br>
+                                    <strong>Neutered:</strong> ${cat['NEUTER STATUS']}
+                                </p>
+                            </div>
+                            <div class="card-footer bg-white border-0">
+                                <a href="cat-details.php?id=${cat.id}" class="btn btn-dark-brown btn-sm w-100">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+</script>
 
 <?php include 'includes/footer.php'; ?>

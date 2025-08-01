@@ -1,6 +1,17 @@
 <?php 
 $pageTitle = "Register";
+require_once 'includes/session-manager.php';
 include 'includes/header.php'; 
+require_once 'includes/db-connect.php';
+
+if (isset($_SESSION['register_errors']) && !empty($_SESSION['register_errors'])) {
+    echo '<div class="alert alert-danger">';
+    foreach ($_SESSION['register_errors'] as $error) {
+        echo "<p class='mb-1'>$error</p>";
+    }
+    echo '</div>';
+    unset($_SESSION['register_errors']);
+}
 ?>
 
 <div class="container py-5">
@@ -33,7 +44,7 @@ include 'includes/header.php';
                         <div class="mb-4">
                             <label for="password" class="form-label">Password</label>
                             <input type="password" class="form-control" id="password" name="password" required>
-                            <div class="form-text">Must be at least 8 characters</div>
+                            <div class="form-text">Must be at least 8 characters with one uppercase, one lowercase, and one number</div>
                         </div>
                         
                         <div class="mb-4">
@@ -55,6 +66,8 @@ include 'includes/header.php';
                             <input type="checkbox" class="form-check-input" id="terms" required>
                             <label class="form-check-label" for="terms">I agree to the <a href="terms.php">Terms of Service</a> and <a href="privacy.php">Privacy Policy</a></label>
                         </div>
+                        
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                         
                         <div class="d-grid">
                             <button type="submit" class="btn btn-dark-brown">Register</button>

@@ -1,6 +1,17 @@
 <?php 
 $pageTitle = "Login";
+require_once 'includes/session-manager.php';
 include 'includes/header.php'; 
+require_once 'includes/db-connect.php';
+
+if (isset($_SESSION['login_errors']) && !empty($_SESSION['login_errors'])) {
+    echo '<div class="alert alert-danger">';
+    foreach ($_SESSION['login_errors'] as $error) {
+        echo "<p class='mb-1'>$error</p>";
+    }
+    echo '</div>';
+    unset($_SESSION['login_errors']);
+}
 ?>
 
 <div class="container py-5">
@@ -23,9 +34,12 @@ include 'includes/header.php';
                             <input type="password" class="form-control" id="password" name="password" required>
                         </div>
                         <div class="mb-4 form-check">
-                            <input type="checkbox" class="form-check-input" id="remember">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
                             <label class="form-check-label" for="remember">Remember me</label>
                         </div>
+                        
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                        
                         <div class="d-grid">
                             <button type="submit" class="btn btn-dark-brown">Login</button>
                         </div>
