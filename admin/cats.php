@@ -16,13 +16,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
 $where = [];
 $params = [];
 
-if (!empty($_GET['status']) && $_GET['status'] !== 'All') {
-    $where[] = 'status = ?';
-    $params[] = $_GET['status'];
+if (!empty($_GET['ADOPTION']) && $_GET['ADOPTION'] !== 'All') {
+    $where[] = '`ADOPTION` = ?';
+    $params[] = $_GET['ADOPTION'];
 }
-if (!empty($_GET['gender']) && $_GET['gender'] !== 'All') {
-    $where[] = 'gender = ?';
-    $params[] = $_GET['gender'];
+
+if (!empty($_GET['GENDER']) && $_GET['GENDER'] !== 'All') {
+    $where[] = 'GENDER = ?';
+    $params[] = $_GET['GENDER'];
 }
 if (!empty($_GET['age']) && $_GET['age'] !== 'All Ages') {
     if ($_GET['age'] === 'Kitten (0-1 year)') {
@@ -119,6 +120,7 @@ $cats = $stmt->fetchAll();
                             <th>Age</th>
                             <th>Gender</th>
                             <th>Status</th>
+                            <th>Medical</th>
                             <th>Date Added</th>
                             <th>Actions</th>
                         </tr>
@@ -142,11 +144,27 @@ $cats = $stmt->fetchAll();
                                 $statusClass = [
                                     'Available' => 'success',
                                     'Pending Adoption' => 'warning',
-                                    'Adopted' => 'primary',
+                                    'N/A' => 'secondary',
+                                    'Foster Care' => 'info',
                                     'Medical Hold' => 'danger'
-                                ][$cat['status']];
+                                ];
                                 ?>
                                 <span class="badge bg-<?php echo $statusClass; ?>"><?php echo htmlspecialchars($cat['status']); ?></span>
+                            </td>
+                            <td>
+                                <?php 
+                                $medicalStatus = '';
+                                if (!empty($cat['MEDICAL_NOTES'])) {
+                                    $medicalStatus = '<span class="badge bg-danger">Medical Notes</span>';
+                                } elseif ($cat['other_vaccines'] == 'yes') {
+                                    $medicalStatus = '<span class="badge bg-success">Vaccinated</span>';
+                                } elseif ($cat['NEUTER STATUS'] == 'Neuter' || $cat['NEUTER STATUS'] == 'Spayed') {
+                                    $medicalStatus = '<span class="badge bg-info">Neutered/Spayed</span>';
+                                } else {
+                                    $medicalStatus = '<span class="badge bg-secondary">No Info</span>';
+                                }
+                                echo $medicalStatus;
+                                ?>
                             </td>
                             <td><?php echo date('m/d/Y', strtotime($cat['date_added'])); ?></td>
                             <td>
@@ -157,6 +175,8 @@ $cats = $stmt->fetchAll();
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="cat-view.php?id=<?php echo $cat['id']; ?>"><i class="fas fa-eye me-2"></i>View</a></li>
                                         <li><a class="dropdown-item" href="cat-edit.php?id=<?php echo $cat['id']; ?>"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                        <!-- Add the medical button here -->
+                                        <li><a class="dropdown-item" href="admin-edit-cat-medical.php?id=<?php echo $cat['id']; ?>"><i class="fas fa-notes-medical me-2"></i>Medical</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this cat?');">

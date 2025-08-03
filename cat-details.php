@@ -19,9 +19,11 @@ if (!$cat) {
     exit();
 }
 
-// Set default image if none exists
-$profileImage = !empty($cat['image_path']) ? $cat['image_path'] : 'assets/images/default-cat.jpg';
+$profileImage = (!empty($cat['image_path']) && $cat['image_path'] !== 'NULL') 
+    ? 'assets/images/uploads/' . $cat['image_path'] 
+    : 'assets/images/default-cat.jpg';
 ?>
+
 
 <section class="py-5">
     <div class="container">
@@ -121,10 +123,12 @@ $profileImage = !empty($cat['image_path']) ? $cat['image_path'] : 'assets/images
             $similarStmt->bind_param("i", $catId);
             $similarStmt->execute();
             $similarResult = $similarStmt->get_result();
-            
+
             if ($similarResult->num_rows > 0) {
                 while ($similarCat = $similarResult->fetch_assoc()):
-                    $similarImage = !empty($similarCat['image_path']) ? $similarCat['image_path'] : 'assets/images/uploads/default.jpg';
+                    $similarImage = (!empty($similarCat['image_path']) && $similarCat['image_path'] !== 'NULL') 
+                        ? 'assets/images/uploads/' . $similarCat['image_path'] 
+                        : 'assets/images/default-cat.jpg';
             ?>
 
             

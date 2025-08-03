@@ -2,7 +2,7 @@
 // Database configuration
 define('DB_HOST', 'localhost');
 define('DB_USERNAME', 'root'); // Change to your database username
-define('DB_PASSWORD', 'Oct2022105389'); // Change to your database password
+define('DB_PASSWORD', ''); // Change to your database password
 define('DB_NAME', 'pawsitive_guardians');
 
 // Create connection

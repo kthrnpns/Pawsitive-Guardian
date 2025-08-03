@@ -31,8 +31,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Move uploaded file
             if (move_uploaded_file($file['tmp_name'], $destination)) {
                 // Update database
-                $stmt = $conn->prepare("UPDATE cats SET image_path = ? WHERE id = ?");
-                $stmt->bind_param("si", $filename, $catId);
+                // Update form fields to match your database structure
+                $stmt = $pdo->prepare("
+                    INSERT INTO cats (
+                        NAME, AGE, GENDER, COLOR, `NEUTER STATUS`, ADOPTION, 
+                        MEDICAL_NOTES, description, image_path, created_at
+                    ) VALUES (
+                        :name, :age, :gender, :color, :neuter_status, :adoption,
+                        :medical_notes, :description, :image_path, NOW()
+                    )
+                ");
                 
                 if ($stmt->execute()) {
                     $success = "Image uploaded successfully!";

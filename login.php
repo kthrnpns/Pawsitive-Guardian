@@ -1,6 +1,6 @@
 <?php 
 $pageTitle = "Login";
-require_once 'includes/session-manager.php';
+require_once __DIR__ . '/../includes/session-manager.php';
 include 'includes/header.php'; 
 require_once 'includes/db-connect.php';
 

@@ -3,8 +3,10 @@ $pageTitle = "Admin Registration";
 require_once 'includes/session-manager.php';
 require_once 'includes/db-connect.php';
 
-// Temporary first admin bypass - REMOVE AFTER CREATING FIRST ADMIN
+// First check if any admin exists
 $is_first_admin = empty($conn->query("SELECT id FROM users WHERE is_admin = 1")->num_rows);
+
+// Then do access control
 if (!$is_first_admin && (empty($_SESSION['is_admin']) || $_SESSION['is_admin'] !== 1)) {
     $_SESSION['error'] = "Admin privileges required";
     header("Location: login.php");

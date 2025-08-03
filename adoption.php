@@ -85,54 +85,66 @@ include 'includes/header.php';
                         <form id="catFilters">
                             <!-- Adoption Status Filter -->
                             <div class="mb-4">
-                                <h6 class="mb-3">Adoption Status</h6>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">Adoption Status</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-dark-brown toggle-all" data-target="adoption">Unselect All</button>
+                                </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="adoption[]" value="Available" id="available" checked>
+                                    <input class="form-check-input adoption-filter" type="checkbox" name="adoption[]" value="Available" id="available" checked>
                                     <label class="form-check-label" for="available">Available</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="adoption[]" value="Pending Adoption" id="pending" checked>
+                                    <input class="form-check-input adoption-filter" type="checkbox" name="adoption[]" value="Pending Adoption" id="pending" checked>
                                     <label class="form-check-label" for="pending">Pending Adoption</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="adoption[]" value="Foster Care" id="foster" checked>
+                                    <input class="form-check-input adoption-filter" type="checkbox" name="adoption[]" value="Foster Care" id="foster" checked>
                                     <label class="form-check-label" for="foster">Foster Care</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="adoption[]" value="Not Available" id="notAvailable">
+                                    <input class="form-check-input adoption-filter" type="checkbox" name="adoption[]" value="Not Available" id="notAvailable">
                                     <label class="form-check-label" for="notAvailable">Not Available</label>
                                 </div>
                             </div>
                             
                             <!-- Gender Filter -->
                             <div class="mb-4">
-                                <h6 class="mb-3">Gender</h6>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">Gender</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-dark-brown toggle-all" data-target="gender">Unselect All</button>
+                                </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="gender" value="Male" id="male" checked>
+                                    <input class="form-check-input gender-filter" type="checkbox" name="gender[]" value="Male" id="male" checked>
                                     <label class="form-check-label" for="male">Male</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="gender" value="Female" id="female" checked>
+                                    <input class="form-check-input gender-filter" type="checkbox" name="gender[]" value="Female" id="female" checked>
                                     <label class="form-check-label" for="female">Female</label>
                                 </div>
                             </div>
                             
                             <!-- Age Filter -->
                             <div class="mb-4">
-                                <h6 class="mb-3">Age</h6>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">Age</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-dark-brown toggle-all" data-target="age">Unselect All</button>
+                                </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="age" value="Kitten" id="kitten" checked>
+                                    <input class="form-check-input age-filter" type="checkbox" name="age[]" value="Kitten" id="kitten" checked>
                                     <label class="form-check-label" for="kitten">Kitten</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="age" value="Adult" id="adult" checked>
+                                    <input class="form-check-input age-filter" type="checkbox" name="age[]" value="Adult" id="adult" checked>
                                     <label class="form-check-label" for="adult">Adult</label>
                                 </div>
                             </div>
                             
                             <!-- Color Filter -->
                             <div class="mb-4">
-                                <h6 class="mb-3">Color</h6>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">Color</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-dark-brown toggle-all" data-target="color">Unselect All</button>
+                                </div>
                                 <?php
                                 // Get unique colors from database
                                 require_once 'includes/db-connect.php';
@@ -142,7 +154,7 @@ include 'includes/header.php';
                                 if ($colorResult->num_rows > 0) {
                                     while ($color = $colorResult->fetch_assoc()) {
                                         echo '<div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="color" value="'.htmlspecialchars($color['COLOR']).'" id="color-'.htmlspecialchars(strtolower(str_replace(' ', '-', $color['COLOR']))).'" checked>
+                                            <input class="form-check-input color-filter" type="checkbox" name="color[]" value="'.htmlspecialchars($color['COLOR']).'" id="color-'.htmlspecialchars(strtolower(str_replace(' ', '-', $color['COLOR']))).'" checked>
                                             <label class="form-check-label" for="color-'.htmlspecialchars(strtolower(str_replace(' ', '-', $color['COLOR']))).'">'.$color['COLOR'].'</label>
                                         </div>';
                                     }
@@ -152,26 +164,30 @@ include 'includes/header.php';
                             
                             <!-- Neuter Status Filter -->
                             <div class="mb-4">
-                                <h6 class="mb-3">Neuter Status</h6>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">Neuter Status</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-dark-brown toggle-all" data-target="neuter">Unselect All</button>
+                                </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="neuter_status[]" value="Neuter" id="neuter" checked>
+                                    <input class="form-check-input neuter-filter" type="checkbox" name="neuter_status[]" value="Neuter" id="neuter" checked>
                                     <label class="form-check-label" for="neuter">Neutered</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="neuter_status[]" value="Spayed" id="spayed" checked>
+                                    <input class="form-check-input neuter-filter" type="checkbox" name="neuter_status[]" value="Spayed" id="spayed" checked>
                                     <label class="form-check-label" for="spayed">Spayed</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="neuter_status[]" value="Unneuter" id="unneuter" checked>
+                                    <input class="form-check-input neuter-filter" type="checkbox" name="neuter_status[]" value="Unneuter" id="unneuter" checked>
                                     <label class="form-check-label" for="unneuter">Unneutered</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="neuter_status[]" value="Unspayed" id="unspay" checked>
+                                    <input class="form-check-input neuter-filter" type="checkbox" name="neuter_status[]" value="Unspayed" id="unspay" checked>
                                     <label class="form-check-label" for="unspay">Unspayed</label>
                                 </div>
                             </div>
                             
                             <button type="button" class="btn btn-dark-brown w-100" onclick="filterCats()">Apply Filters</button>
+                            <button type="button" class="btn btn-outline-dark-brown w-100 mt-2" onclick="resetFilters()">Reset Filters</button>
                         </form>
                     </div>
                 </div>
@@ -198,7 +214,7 @@ include 'includes/header.php';
                             // Set image path - check if image_path exists, otherwise use default
                             $imagePath = (!empty($cat['image_path']) && file_exists('assets/images/uploads/' . $cat['image_path'])) 
                                 ? 'assets/images/uploads/' . $cat['image_path'] 
-                                : 'assets/images/default.jpg';
+                                : 'assets/images/default-cat.jpg';
                             
                             $adoptionStatus = $cat['ADOPTION'];
                             $statusBadge = '';
@@ -296,31 +312,66 @@ include 'includes/header.php';
 </section>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle All functionality
+    document.querySelectorAll('.toggle-all').forEach(button => {
+        button.addEventListener('click', function() {
+            const target = this.dataset.target;
+            const checkboxes = document.querySelectorAll(`.${target}-filter`);
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !allChecked;
+            });
+        });
+    });
+});
+
+function resetFilters() {
+    // Uncheck all checkboxes
+    document.querySelectorAll('#catFilters input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    // Check the default options
+    document.querySelectorAll('#available, #pending, #foster, #male, #female, #kitten, #adult, #neuter, #spayed, #unneuter, #unspay').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    
+    // Check all color filters
+    document.querySelectorAll('.color-filter').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    
+    filterCats();
+}
+
 function filterCats() {
     const form = document.getElementById('catFilters');
-    const formData = new FormData(form);
     const params = new URLSearchParams();
     
-    // Add all checked filters
-    formData.forEach((value, key) => {
-        // For checkboxes, we only want to include checked ones
-        if (form.querySelector(`input[name="${key}"]:checked`)) {
-            params.append(key, value);
+    // Collect all filter groups
+    const filterGroups = {
+        adoption: Array.from(form.querySelectorAll('input[name="adoption[]"]:checked')).map(cb => cb.value),
+        gender: Array.from(form.querySelectorAll('input[name="gender[]"]:checked')).map(cb => cb.value),
+        age: Array.from(form.querySelectorAll('input[name="age[]"]:checked')).map(cb => cb.value),
+        color: Array.from(form.querySelectorAll('input[name="color[]"]:checked')).map(cb => cb.value),
+        neuter_status: Array.from(form.querySelectorAll('input[name="neuter_status[]"]:checked')).map(cb => cb.value)
+    };
+    
+    // Only include non-empty filter groups
+    Object.entries(filterGroups).forEach(([key, values]) => {
+        if (values.length > 0) {
+            values.forEach(value => params.append(key + '[]', value));
         }
     });
     
-    // Debug the URL being requested
-    console.log(`Fetching: api/get_cats.php?${params.toString()}`);
-    
     fetch(`api/get_cats.php?${params.toString()}`)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            if (!response.ok) throw new Error('Network response was not ok');
             return response.json();
         })
         .then(data => {
-            console.log('Received data:', data); // Debug received data
             const container = document.getElementById('catListings');
             container.innerHTML = '';
             
@@ -328,7 +379,7 @@ function filterCats() {
                 container.innerHTML = `
                     <div class="col-12">
                         <div class="alert alert-info text-center">
-                            No cats match your filters. Please try different criteria.
+                            No cats match your current filters. Please try different criteria.
                         </div>
                     </div>
                 `;

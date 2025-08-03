@@ -62,8 +62,12 @@ include 'includes/header.php';
             $featuredCats = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             foreach ($featuredCats as $cat): 
-                $imagePath = !empty($cat['image_path']) ? $cat['image_path'] : 'assets/images/default-cat.jpg';
-            ?>
+                $imagePath = (!empty($cat['image_path']) && $cat['image_path'] !== 'NULL') 
+                ? 'assets/images/uploads/' . $cat['image_path'] 
+                : 'assets/images/default-cat.jpg';
+                ?>
+
+                
             <div class="col-md-6 col-lg-3">
                 <div class="cat-card h-100">
                     <img src="<?= htmlspecialchars($imagePath) ?>" class="card-img-top" alt="<?= htmlspecialchars($cat['NAME']) ?>">
