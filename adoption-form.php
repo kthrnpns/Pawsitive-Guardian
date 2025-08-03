@@ -129,8 +129,44 @@ if (!$cat) {
                                 </div>
                             </div>
                             
-                            <!-- Rest of the form (terms and conditions, signature section) remains the same -->
-                            <!-- ... -->
+                            <!-- Signature Upload Section -->
+<div class="mb-4">
+    <h4 class="mb-4 border-bottom pb-2">Agreement</h4>
+    
+    <!-- Terms and Conditions -->
+    <div class="mb-4 p-3 border rounded bg-light">
+        <h5>Terms and Conditions</h5>
+        <p>We are delighted that you have chosen to adopt a cat from Pawsitive Guardians! Thank you for 
+        opening your heart and home to our dear feline friend. We believe every cat deserves a loving 
+        and forever home, and we are thrilled to partner with you in this journey.</p>
+        
+        <ol>
+            <li><strong>First and Last Week of the Month Update:</strong> We kindly request updates on your cat's well-being during these periods.</li>
+            <li><strong>Health Care:</strong> Complete deworming and vaccinations are required with proof provided.</li>
+            <li><strong>Spaying/Neutering:</strong> If not already done, procedure must be completed with proof provided.</li>
+            <li><strong>Transportation:</strong> Adopter is responsible for pet transportation.</li>
+            <li><strong>Commitment to Care:</strong> Provide a loving, safe, and nurturing environment.</li>
+        </ol>
+        
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="agree_terms" name="agree_terms" required>
+            <label class="form-check-label" for="agree_terms">I agree to the terms and conditions above</label>
+        </div>
+    </div>
+    
+    <!-- Signature Upload -->
+    <div class="mb-4">
+        <label class="form-label">Upload Signature *</label>
+        <input type="file" class="form-control" name="signature" accept="image/*" required>
+        <small class="text-muted">Please upload an image of your signature (PNG, JPG, JPEG)</small>
+    </div>
+    
+    <!-- Adoption Date -->
+    <div class="mb-4">
+        <label class="form-label">Adoption Date *</label>
+        <input type="date" class="form-control" name="adoption_date" required>
+    </div>
+</div>
                             
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-dark-brown btn-lg">Submit Adoption Application</button>
