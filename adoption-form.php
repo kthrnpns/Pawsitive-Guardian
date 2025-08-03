@@ -29,6 +29,18 @@ if ($cat['ADOPTION'] !== 'Available') {
     exit();
 }
 
+// Display errors if they exist
+if (isset($_SESSION['adoption_errors'])) {
+    $errors = $_SESSION['adoption_errors'];
+    unset($_SESSION['adoption_errors']);
+    
+    // Repopulate form fields if available
+    if (isset($_SESSION['form_data'])) {
+        $formData = $_SESSION['form_data'];
+        unset($_SESSION['form_data']);
+    }
+}
+
 // Get logged in user's info if available
 $userInfo = [];
 if (isset($_SESSION['user_id'])) {
